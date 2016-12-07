@@ -1,4 +1,5 @@
-/.DS_Store
 *.o
-/try1/Lace
 *.so
+.DS_Store
+
+/try1/Lace
