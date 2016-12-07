@@ -37,7 +37,7 @@ int render(SDL_Window *win) {
       }
     }
 
-    SDL_Rect frame = { 100, 100, 405, 550 };
+    SDL_Rect frame = { 100, f(10), *h, g() };
 
     //Render the scene
     SDL_RenderClear(renderer);
