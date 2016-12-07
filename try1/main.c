@@ -1,5 +1,24 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
+#include "render.h"
+
+static int repl(void *ptr) {
+  int run = 1;
+  while(run) {
+    printf("> ");
+    char input[1024];
+    fgets(input, 1024, stdin);
+
+    if(strcmp(input, "q\n") == 0) {
+      run = 0;
+      quit = 1;
+    }
+    else {
+      printf("Can't understand command: %s\n", input);
+    }    
+  }
+  return 0;
+}
 
 int main() {
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -13,49 +32,10 @@ int main() {
     return 1;
   }
 
-  SDL_Renderer *renderer = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-  if (renderer == NULL) {
-    printf("%s\n", SDL_GetError());
-    return 1;
-  }
-  
-  SDL_Surface *bmp = SDL_LoadBMP("./flower.bmp");
-  if (bmp == NULL) {
-    printf("%s\n", SDL_GetError());
-    return 1;
-  }
+  SDL_Thread *thread = SDL_CreateThread(repl, "repl", NULL);
 
-  SDL_Texture *tex = SDL_CreateTextureFromSurface(renderer, bmp);
-  SDL_FreeSurface(bmp);
-  if (tex == NULL) {
-    printf("%s\n", SDL_GetError());
-    return 1;
-  }
-
-  SDL_Event e;
-  int quit = 0;
-  
-  while (!quit){
-    while (SDL_PollEvent(&e)){
-      if (e.type == SDL_QUIT){
-        quit = 1;
-      }
-      if (e.type == SDL_KEYDOWN){
-        quit = 1;
-      }
-      if (e.type == SDL_MOUSEBUTTONDOWN){
-        
-      }
-    }
-
-    SDL_Rect frame = { 100, 100, 405, 550 };
-
-    //Render the scene
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, tex, NULL, &frame);
-    SDL_RenderPresent(renderer);
-  }
+  int result = render(win);
   
   SDL_Quit();
-  return 0;
+  return result;
 }
