@@ -2,6 +2,8 @@
 
 #include <SDL2/SDL.h>
 
+int performReload;
+
 extern int quit;
 int (*f)(int);
 int (*g)();

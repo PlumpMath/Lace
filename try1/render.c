@@ -1,8 +1,35 @@
 #include "render.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <dlfcn.h>
+#include <unistd.h>
 
 int quit;
 
+void *dylib = NULL;
+
+void reload() {
+  system("clang -g -shared -o f.so f.c");
+  if(dylib) {
+    dlclose(dylib);
+  }
+  dylib = dlopen("f.so", RTLD_LAZY);
+  if(!dylib) {
+    fputs (dlerror(), stderr);
+    exit(1);
+  }
+  f = dlsym(dylib, "f");
+  g = dlsym(dylib, "g");
+  h = dlsym(dylib, "h");
+
+  printf("Done\n");
+  performReload = 0;
+}
+
 int render(SDL_Window *win) {
+  
+  reload(); // make sure the function is loaded properly first
+  
   SDL_Renderer *renderer = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
   if (renderer == NULL) {
     printf("%s\n", SDL_GetError());
@@ -37,7 +64,13 @@ int render(SDL_Window *win) {
       }
     }
 
-    SDL_Rect frame = { 100, f(10), *h, g() };
+    if(performReload) {
+      printf("Will reload.\n");
+      reload();
+      printf("Did reload.\n");
+    }
+
+    SDL_Rect frame = { 100, f(10), 440, g() };
 
     //Render the scene
     SDL_RenderClear(renderer);

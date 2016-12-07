@@ -5,23 +5,6 @@
 #include <SDL2/SDL.h>
 #include "render.h"
 
-void *dylib = NULL;
-
-void reload() {
-  system("clang -shared -o f.so f.c");
-  if(dylib) {
-    dlclose(dylib);
-  }
-  dylib = dlopen("f.so", RTLD_LAZY);
-  if(!dylib) {
-    fputs (dlerror(), stderr);
-    exit(1);
-  }
-  f = dlsym(dylib, "f");
-  g = dlsym(dylib, "g");
-  h = dlsym(dylib, "h");
-}
-
 static int repl(void *ptr) {
   int run = 1;
   while(run) {
@@ -34,7 +17,7 @@ static int repl(void *ptr) {
       quit = 1;
     }
     else if(strcmp(input, "r\n") == 0) {
-      reload();
+      performReload = 1;
     }
     else {
       printf("Can't understand command: %s\n", input);
@@ -56,8 +39,6 @@ int main() {
   }
 
   SDL_Thread *thread = SDL_CreateThread(repl, "repl", NULL);
-
-  reload(); // make sure the function is loaded properly first
   
   int result = render(win);
   

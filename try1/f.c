@@ -6,4 +6,4 @@ int g() {
   return 550;
 }
 
-int h = 440;
+//int h = 440;
