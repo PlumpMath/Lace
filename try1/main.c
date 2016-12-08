@@ -36,15 +36,21 @@ static struct mg_serve_http_opts s_http_server_opts;
 static void ev_handler(struct mg_connection *c, int ev, void *p) {
   if (ev == MG_EV_HTTP_REQUEST) {
     struct http_message *hm = (struct http_message *) p;
-    mg_send_head(c, 200, hm->message.len, "Content-Type: text/plain");
-    
+    char reply[100];
+
     if(mg_vcmp(&hm->uri, "/yo") == 0) {
-      printf("It's a yo.\n");
-      mg_printf(c, "HTTP/1.1 200 OK\r\nContent-Length: %lu\r\n\r\n%.*s",
-                (unsigned long) hm->body.len, (int) hm->body.len, hm->body.p);
-    } else {      
-      mg_printf(c, "%.*s", (int)hm->message.len, hm->message.p);
+      snprintf(reply, sizeof(reply), "<h1>Yo!</h1>");
+    } else {
+      snprintf(reply, sizeof(reply), "<h1>uri %.*s</h1>", (int)hm->uri.len, hm->uri.p);
     }
+
+    mg_printf(c,
+              "HTTP/1.1 200 OK\r\n"
+              "Content-Type: text/html\r\n"
+              "Content-Length: %d\r\n"
+              "\r\n"
+              "%s",
+              (int) strlen(reply), reply);
   }
 }
 
@@ -76,6 +82,7 @@ int server(void *ptr) {
 }
 
 int main() {
+  server(0);
   SDL_Window *win = render_setup();
   SDL_Thread *replThread = SDL_CreateThread(repl, "repl", NULL);
   SDL_Thread *serverThread = SDL_CreateThread(server, "server", NULL);
