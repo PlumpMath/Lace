@@ -1,9 +1,8 @@
-CFLAGS=-I/usr/local/include
-LDFLAGS=-L/usr/local/lib/
-LDLIBS=-lsdl2
+CFLAGS=`pkg-config --cflags sdl2`
+LDFLAGS=`pkg-config --libs sdl2`
 
 all: main.o;
-	clang main.c render.c -o Lace -g -O0 $(CFLAGS) $(LDFLAGS) $(LDLIBS)
+	clang main.c render.c -o Lace -g -O0 $(CFLAGS) $(LDFLAGS)
 
 run:
 	./Lace
