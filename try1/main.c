@@ -5,7 +5,7 @@
 #include <SDL.h>
 #include "render.h"
 #include "db.h"
-#include <mongoose.h>
+#include "mongoose.h"
 
 #define INPUT_EQ(s) (strcmp((input), (s)) == 0)
 
