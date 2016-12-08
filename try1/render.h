@@ -2,14 +2,10 @@
 
 #include <SDL.h>
 
+int quit;
 int performReload;
 
-extern int quit;
-int (*f)(int);
-int (*g)();
-int *h;
+SDL_Window *render_setup();
+int render_go(SDL_Window* win);
 
 SDL_Point (*updateFn)(SDL_Point);
-
-int render(SDL_Window* win);
-

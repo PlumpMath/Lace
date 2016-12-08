@@ -26,15 +26,32 @@ void reload() {
     fputs (dlerror(), stderr);
     exit(1);
   }
-  f = dlsym(dylib, "f");
-  g = dlsym(dylib, "g");
-  h = dlsym(dylib, "h");
+  
   updateFn = dlsym(dylib, "updateFn");
 
   performReload = 0;
 }
 
-int render(SDL_Window *win) {
+SDL_Window *render_setup() {
+  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    printf("%s\n", SDL_GetError());
+    return NULL;
+  }
+
+  SDL_Window *win = SDL_CreateWindow("L . A . C . E", 100, 100, 750, 750, SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI);
+  if (win == NULL) {
+    printf("%s\n", SDL_GetError());
+    return NULL;
+  }
+
+  int w, h;
+  SDL_GL_GetDrawableSize(win, &w, &h);
+  printf("Drawable size: %d x %d\n", w, h);
+
+  return win;
+}
+
+int render_go(SDL_Window *win) {
   
   reload(); // make sure the function is loaded properly first
   
