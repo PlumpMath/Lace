@@ -9,5 +9,7 @@ int (*f)(int);
 int (*g)();
 int *h;
 
+SDL_Point (*updateFn)(SDL_Point);
+
 int render(SDL_Window* win);
 

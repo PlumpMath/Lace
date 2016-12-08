@@ -32,11 +32,15 @@ int main() {
     return 1;
   }
 
-  SDL_Window *win = SDL_CreateWindow("L . A . C . E", 100, 100, 750, 750, SDL_WINDOW_SHOWN);
+  SDL_Window *win = SDL_CreateWindow("L . A . C . E", 100, 100, 750, 750, SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI);
   if (win == NULL) {
     printf("%s\n", SDL_GetError());
     return 1;
   }
+
+  int w, h;
+  SDL_GL_GetDrawableSize(win, &w, &h);
+  printf("Drawable size: %d x %d\n", w, h);
 
   SDL_Thread *thread = SDL_CreateThread(repl, "repl", NULL);
   

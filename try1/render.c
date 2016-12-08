@@ -8,8 +8,13 @@ int quit;
 
 void *dylib = NULL;
 
+SDL_Point positions[] = { { 100, 200 },
+                          { 500, 400 },
+                          { 300, 100 },
+                          { 200, 300 }};
+
 void reload() {
-  system("clang -g -shared -o f.so f.c");
+  system("clang -g -shared -o f.so f.c `pkg-config --libs sdl2 --cflags sdl2`");
   if(dylib) {
     dlclose(dylib);
   }
@@ -21,8 +26,8 @@ void reload() {
   f = dlsym(dylib, "f");
   g = dlsym(dylib, "g");
   h = dlsym(dylib, "h");
+  updateFn = dlsym(dylib, "updateFn");
 
-  printf("Done\n");
   performReload = 0;
 }
 
@@ -36,7 +41,7 @@ int render(SDL_Window *win) {
     return 1;
   }
   
-  SDL_Surface *bmp = SDL_LoadBMP("./flower.bmp");
+  SDL_Surface *bmp = SDL_LoadBMP("./Dot.bmp");
   if (bmp == NULL) {
     printf("%s\n", SDL_GetError());
     return 1;
@@ -65,16 +70,31 @@ int render(SDL_Window *win) {
     }
 
     if(performReload) {
-      printf("Will reload.\n");
+      //printf("Will reload.\n");
       reload();
-      printf("Did reload.\n");
+      //printf("Did reload.\n");
     }
 
-    SDL_Rect frame = { 100, f(10), 440, g() };
-
+    // Update
+    for(int i = 0; i < sizeof(positions) / sizeof(SDL_Point); i++) {
+      SDL_Point p = updateFn(positions[i]);
+      if(p.x > 1500) { p.x = 0; }
+      if(p.x < 0) { p.x = 1500; }
+      if(p.y > 1500) { p.y = 0; }
+      if(p.y < 0) { p.y = 1500; }
+      positions[i] = p;      
+    }
+    
     //Render the scene
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, tex, NULL, &frame);
+    
+    for(int i = 0; i < sizeof(positions) / sizeof(SDL_Point); i++) {
+      SDL_Point p = positions[i];
+      SDL_Rect frame = { p.x, p.y, 64, 64 };
+      SDL_RenderCopy(renderer, tex, NULL, &frame);
+    }
+    
     SDL_RenderPresent(renderer);
   }
 
