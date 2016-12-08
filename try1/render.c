@@ -11,6 +11,9 @@ void *dylib = NULL;
 SDL_Point positions[] = { { 100, 200 },
                           { 500, 400 },
                           { 300, 100 },
+                          { 130, 100 },
+                          { 110, 600 },
+                          { 90,  80 },
                           { 200, 300 }};
 
 void reload() {
@@ -40,6 +43,12 @@ int render(SDL_Window *win) {
     printf("%s\n", SDL_GetError());
     return 1;
   }
+
+  int w, h;
+  SDL_GL_GetDrawableSize(win, &w, &h);
+  printf("Drawable size: %d x %d\n", w, h);
+
+  SDL_RenderSetScale(renderer, 2, 2);
   
   SDL_Surface *bmp = SDL_LoadBMP("./Dot.bmp");
   if (bmp == NULL) {
@@ -78,19 +87,28 @@ int render(SDL_Window *win) {
     // Update
     for(int i = 0; i < sizeof(positions) / sizeof(SDL_Point); i++) {
       SDL_Point p = updateFn(positions[i]);
-      if(p.x > 1500) { p.x = 0; }
-      if(p.x < 0) { p.x = 1500; }
-      if(p.y > 1500) { p.y = 0; }
-      if(p.y < 0) { p.y = 1500; }
-      positions[i] = p;      
+      if(p.x > 750) { p.x = 0; }
+      if(p.x < 0) { p.x = 750; }
+      if(p.y > 750) { p.y = 0; }
+      if(p.y < 0) { p.y = 750; }
+      positions[i] = p;
     }
     
     //Render the scene
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
+    SDL_Rect rect = { 0, h / 2 - 32, w / 2, 32 };
+    SDL_RenderFillRect(renderer, &rect);
     
+    SDL_Point *prev = NULL;
     for(int i = 0; i < sizeof(positions) / sizeof(SDL_Point); i++) {
       SDL_Point p = positions[i];
+      if(prev) {
+        SDL_RenderDrawLine(renderer, prev->x + 32, prev->y + 32, p.x + 32, p.y + 32);
+      }
+      prev = positions + i;
       SDL_Rect frame = { p.x, p.y, 64, 64 };
       SDL_RenderCopy(renderer, tex, NULL, &frame);
     }
