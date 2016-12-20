@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <glad/glad.h>
+#include "glad.h"
 #include <SDL.h>
 #include "hotrod.h"
 
@@ -10,7 +10,7 @@
 int handle_events();
 
 float tri[] = { -0.8,  0.6,    1, 0, 0,
-                0.7,  0.0,    1, 1, 1,
+                +0.7,  0.0,    1, 1, 1,
                 -0.8, -0.6,    1, 1, 0, };
 
 const char *vertex_shader_src = ""
@@ -116,8 +116,10 @@ int main() {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
 
+    //hotrod_extra_includes = (char*[]) { , NULL };
+    
     while(!handle_events()) {
-        glClearColor(0,0,0,1);
+        HOTROD(flop);
         glClear(GL_COLOR_BUFFER_BIT);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         SDL_GL_SwapWindow(win);
