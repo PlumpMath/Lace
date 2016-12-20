@@ -1,32 +1,51 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* ~ Hunter Lib ~                               */
+/* For hunting down memory leaks.               */
+/* Inspired by Eskils "How I Program C" talk.   */
+
 typedef struct {
-  const char *file;
-  const int line;
-  const size_t size;
-  void *mem;
+  char *file;
+  int line;
+  size_t size;
+  void *memory;
   int freed;
 } Allocation;
 
-Allocation allocations[1024];
-int last_alloc = 0;
+static Allocation *allocations;
+static int alloc_size = 0;
+static int alloc_counter = 0;
 
-void *malloc_traced(size_t size, char *file, int line) {
+void allocations_add(Allocation a) {
+  if(alloc_size == 0) {
+    alloc_size = 1;
+    allocations = malloc(sizeof(Allocation) * alloc_size);
+  }
+  
+  allocations[alloc_counter++] = a;
+  
+  if(alloc_counter >= alloc_size) {
+    alloc_size *= 2;
+    allocations = realloc(allocations, sizeof(Allocation) * alloc_size);
+  }
+}
+
+void *hunter_malloc(size_t size, char *file, int line) {
   void *memory = malloc(size);
   Allocation a = {
     .file = file,
     .line = line,
     .size = size,
-    .mem = memory
+    .memory = memory
   };
-  allocations[last_alloc++] = a;
+  allocations_add(a);
   return memory;
 }
 
-void free_traced(void *ptr) {
-  for(int i = 0; i < last_alloc; i++) {
-    if(allocations[i].mem == ptr) {
+void hunter_free(void *ptr) {
+  for(int i = 0; i < alloc_counter; i++) {
+    if(allocations[i].memory == ptr) {
       allocations[i].freed = 1;
       break;
     }
@@ -34,22 +53,23 @@ void free_traced(void *ptr) {
   free(ptr);
 }
 
-void show_allocs() {
-  for(int i = 0; i < last_alloc; i++) {
+void hunter_show_allocations() {
+  printf(" ~ Hunter Leaks ~ \n");
+  for(int i = 0; i < alloc_counter; i++) {
     Allocation a = allocations[i];
     if(a.freed == 0) {
-      printf("%ld bytes of memory not freed. Allocated in '%s' at line %d (%p).\n", a.size, a.file, a.line, a.mem);
+      printf("%ld bytes of memory not freed (%p). Allocated in '%s' at line %d.\n", a.size, a.memory, a.file, a.line);
     }
   }
 }
 
-#define malloc(size) malloc_traced((size), __FILE__, __LINE__);
-#define free(size) free_traced(size);
+#define malloc(size) hunter_malloc((size), __FILE__, __LINE__);
+#define free(size) hunter_free(size);
 
 int main() {
   int *ip = malloc(sizeof(int));
   float *fp = malloc(sizeof(float));
   char *sp = malloc(sizeof(char*) * 256);
-  //free(ip);
-  show_allocs();
+  free(fp);
+  hunter_show_allocations();
 }
