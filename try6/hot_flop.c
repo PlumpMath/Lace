@@ -1,5 +1,5 @@
 #include "glad.h"
 
 void flop() {
-  glClearColor(0.1, 0.52, 0.48, 1);
+  glClearColor(0.9, 0.6, 0.8, 1);
 }
