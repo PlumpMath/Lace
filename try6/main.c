@@ -10,9 +10,40 @@
 
 int handle_events();
 
-float tri[] = { -0.8,  0.6,    1, 0, 0,
-                +0.7,  0.0,    1, 1, 1,
-                -0.8, -0.6,    1, 1, 0, };
+float *tri = NULL;
+int tri_count = 6;
+
+void load_model() {
+    if(tri) {
+        free(tri);
+    }
+    tri = malloc(sizeof(float) * 5 * 512); // max nr of tris is 512
+    tri_count = 0;
+    
+    char *data = file_read_all("data.txt");
+    char *line = data;
+    while(1) {
+        float x, y, r, g, b;
+        int read = sscanf(line, "%f %f %f %f %f", &x, &y, &r, &g, &b);
+        if(read == 5) {
+            //printf("Read (%+.2f, %+.2f, %+.2f, %+.2f, %+.2f)\n", x, y, r, g, b);
+            tri[tri_count * 5 + 0] = x;
+            tri[tri_count * 5 + 1] = y;
+            tri[tri_count * 5 + 2] = r;
+            tri[tri_count * 5 + 3] = g;
+            tri[tri_count * 5 + 4] = b;
+            tri_count++;
+        }
+        // Find end of line
+        char *i = strchr(line, '\n'); 
+        if(i == NULL) {
+            break;
+        } else {
+            int line_length = i - line;
+            line += line_length + 1;
+        }
+    }
+}
 
 void check_shader(GLuint shader, const char *shader_name) {
     GLint success;
@@ -56,7 +87,16 @@ void load_shader_program() {
     }
 }
 
-int main() {    
+int main() {
+    load_model();
+    for(int i = 0; i < tri_count; i++) {
+        float x = tri[i * 5 + 0];
+        float y = tri[i * 5 + 1];
+        float r = tri[i * 5 + 2];
+        float g = tri[i * 5 + 3];
+        float b = tri[i * 5 + 4];
+    }
+    
     OK(SDL_Init(SDL_INIT_EVERYTHING));
 
     SDL_Window *win;
@@ -86,8 +126,6 @@ int main() {
     /* printf("GL version according to SDL..? %d.%d\n", major_version, minor_version); */
 
     // GL Actual Work
-    glClearColor(0.95, 0.9, 0.95, 1.0);
-
     load_shader_program();
     glUseProgram(program);
   
@@ -98,7 +136,7 @@ int main() {
     GLuint vbo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(tri), tri, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * tri_count * 5, tri, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
@@ -111,7 +149,7 @@ int main() {
     while(!handle_events()) {
         HOTROD(flop);
         glClear(GL_COLOR_BUFFER_BIT);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, tri_count);
         SDL_GL_SwapWindow(win);
         SDL_Delay(30);
     }
@@ -133,6 +171,8 @@ int handle_events() {
                 printf("Reloading shader program.\n");
                 load_shader_program();
                 glUseProgram(program);
+                printf("Reloading model.\n");
+                load_model();
             }
             break;
         case SDL_KEYDOWN:
