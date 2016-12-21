@@ -12,6 +12,7 @@ int handle_events();
 
 float *tri = NULL;
 int tri_count = 6;
+GLuint vbo;
 
 void load_model() {
     if(tri) {
@@ -133,7 +134,6 @@ int main() {
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
   
-    GLuint vbo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * tri_count * 5, tri, GL_STATIC_DRAW);
@@ -173,6 +173,7 @@ int handle_events() {
                 glUseProgram(program);
                 printf("Reloading model.\n");
                 load_model();
+                glBufferData(GL_ARRAY_BUFFER, sizeof(float) * tri_count * 5, tri, GL_STATIC_DRAW);
             }
             break;
         case SDL_KEYDOWN:
