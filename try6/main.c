@@ -23,7 +23,7 @@ void load_model() {
     if(tri) {
         free(tri);
     }
-    tri = malloc(sizeof(float) * 5 * 512); // max nr of tris is 512
+    tri = malloc(sizeof(float) * 6 * 512); // max nr of tris is 512
     tri_count = 0;
     
     char *data = file_read_all("data.txt");
@@ -41,17 +41,18 @@ void load_model() {
         char *line = malloc(line_length);
         strncpy(line, linep, line_length);
         
-        float x, y, r, g, b;
-        int read = sscanf(line, "%f %f %f %f %f", &x, &y, &r, &g, &b);
+        float x, y, z, r, g, b;
+        int read = sscanf(line, "%f %f %f %f %f %f", &x, &y, &z, &r, &g, &b);
 
         // Only create a triangle if all five data points could be read
-        if(read == 5) {
-            //printf("Read (%+.2f, %+.2f, %+.2f, %+.2f, %+.2f)\n", x, y, r, g, b);
+        if(read == 6) {
+            printf("Read (%+.2f, %+.2f, %+.2f, %+.2f, %+.2f, %+.2f)\n", x, y, z, r, g, b);
             tri[tri_count * 5 + 0] = x;
             tri[tri_count * 5 + 1] = y;
-            tri[tri_count * 5 + 2] = r;
-            tri[tri_count * 5 + 3] = g;
-            tri[tri_count * 5 + 4] = b;
+            tri[tri_count * 5 + 2] = z;
+            tri[tri_count * 5 + 3] = r;
+            tri[tri_count * 5 + 4] = g;
+            tri[tri_count * 5 + 5] = b;
             tri_count++;
         } else {
             //printf("Skipping line: %s\n", line);
@@ -116,13 +117,6 @@ gbMat4 transform;
 
 int main() {
     load_model();
-    for(int i = 0; i < tri_count; i++) {
-        float x = tri[i * 5 + 0];
-        float y = tri[i * 5 + 1];
-        float r = tri[i * 5 + 2];
-        float g = tri[i * 5 + 3];
-        float b = tri[i * 5 + 4];
-    }
     
     OK(SDL_Init(SDL_INIT_EVERYTHING));
 
@@ -165,10 +159,10 @@ int main() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * tri_count * 5, tri, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 
     gbMat4 id;
     gb_mat4_identity(&id);
