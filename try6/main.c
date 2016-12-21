@@ -156,7 +156,7 @@ int main() {
   
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * tri_count * 5, tri, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * tri_count * 6, tri, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
@@ -171,12 +171,30 @@ int main() {
     GLint transformLoc = glGetUniformLocation(program, "transform");
     assert(transformLoc > -1);
 
-    glEnable(GL_DEPTH_TEST);
+    GLint projectionLoc = glGetUniformLocation(program, "projection");
+    assert(projectionLoc > -1);
+
+    GLint camLoc = glGetUniformLocation(program, "camera");
+    assert(camLoc > -1);
+
+    gbMat4 projection;
+    gbMat4 camera;
+
+    gbVec3 eye = { 0, 0, -2 };
+    gbVec3 centre = { 0, 0, 0 };
+    gbVec3 up = { 0, 1, 0 };
     
+    gb_mat4_look_at(&camera, eye, centre, up);
+
+    glEnable(GL_DEPTH_TEST);
+
+    // RENDER LOOP
     while(!handle_events()) {
-        HOTROD(flop);
+        HOTROD(flop, &projection);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, transform.e);
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projection.e);
+        glUniformMatrix4fv(camLoc, 1, GL_FALSE, camera.e);
         glDrawArrays(GL_TRIANGLES, 0, tri_count);
         SDL_GL_SwapWindow(win);
         SDL_Delay(30);
