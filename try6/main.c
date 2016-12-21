@@ -1,10 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <assert.h>
 #include "glad.h"
 #include <SDL.h>
+#define HUNTER_ENABLED
+#include "hunter.h"
 #include "hotrod.h"
 #include "files.h"
+#define GB_MATH_IMPLEMENTATION
+#include "gb_math.h"
 
 #define OK(error) if((error) != 0) { fprintf(stderr, "Error: %s\n", SDL_GetError()); exit(1); }
 
@@ -22,10 +27,24 @@ void load_model() {
     tri_count = 0;
     
     char *data = file_read_all("data.txt");
-    char *line = data;
+    char *linep = data;
     while(1) {
+        // Find end of line
+        char *i = strchr(linep, '\n'); 
+        if(i == NULL) {
+            break;
+        }
+
+        int line_length = i - linep;
+
+        // Create a substring with only the current line
+        char *line = malloc(line_length);
+        strncpy(line, linep, line_length);
+        
         float x, y, r, g, b;
         int read = sscanf(line, "%f %f %f %f %f", &x, &y, &r, &g, &b);
+
+        // Only create a triangle if all five data points could be read
         if(read == 5) {
             //printf("Read (%+.2f, %+.2f, %+.2f, %+.2f, %+.2f)\n", x, y, r, g, b);
             tri[tri_count * 5 + 0] = x;
@@ -34,16 +53,15 @@ void load_model() {
             tri[tri_count * 5 + 3] = g;
             tri[tri_count * 5 + 4] = b;
             tri_count++;
-        }
-        // Find end of line
-        char *i = strchr(line, '\n'); 
-        if(i == NULL) {
-            break;
         } else {
-            int line_length = i - line;
-            line += line_length + 1;
+            //printf("Skipping line: %s\n", line);
         }
+
+        linep += line_length + 1;
+        free(line);
     }
+
+    free(data);
 }
 
 void check_shader(GLuint shader, const char *shader_name) {
@@ -88,6 +106,14 @@ void load_shader_program() {
     }
 }
 
+void print_mat4(const gbMat4 *m) {
+    for(int i = 0; i < 4; i++) {
+        printf("%f %f %f %f\n", m->col[i].x, m->col[i].y, m->col[i].z, m->col[i].w);
+    }
+}
+
+gbMat4 transform;
+
 int main() {
     load_model();
     for(int i = 0; i < tri_count; i++) {
@@ -129,7 +155,7 @@ int main() {
     // GL Actual Work
     load_shader_program();
     glUseProgram(program);
-  
+    
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -144,11 +170,19 @@ int main() {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
 
-    //hotrod_extra_includes = (char*[]) { , NULL };
+    gbMat4 id;
+    gb_mat4_identity(&id);
+    transform = id;
+
+    GLint transformLoc = glGetUniformLocation(program, "transform");
+    assert(transformLoc > -1);
+
+    glEnable(GL_DEPTH_TEST);
     
     while(!handle_events()) {
         HOTROD(flop);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, transform.e);
         glDrawArrays(GL_TRIANGLES, 0, tri_count);
         SDL_GL_SwapWindow(win);
         SDL_Delay(30);
@@ -157,6 +191,9 @@ int main() {
     SDL_GL_DeleteContext(glcontext);
     SDL_DestroyWindow(win);
     SDL_Quit();
+
+    free(tri);
+    hunter_print_allocations();
 }
 
 int handle_events() {
@@ -181,7 +218,8 @@ int handle_events() {
                 return 1;
             }
             else if(event.key.keysym.scancode == SDL_SCANCODE_RETURN) {
-                
+                HOTROD(on_enter);
+                //print_mat4(&transform);
             }
             break;
         }
