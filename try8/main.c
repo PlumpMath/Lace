@@ -6,13 +6,16 @@
 #include "hotrod.h"
 #include "files.h"
 
+#define GB_MATH_IMPLEMENTATION
+#include "gb_math.h"
+
 GLuint program;
 
 int main() {    
     Glap glap = glap_start();
    
     // GL Actual Work
-    program = load_shader_program();
+    program = load_shader_program("shader.vert", "shader.frag");
     glUseProgram(program);
 
     // All programs need at least one Vertex Array Object
@@ -62,7 +65,7 @@ int main() {
             case SDL_WINDOWEVENT:
                 if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
                     printf("Reloading shader program.\n");
-                    load_shader_program();
+                    load_shader_program("shader.vert", "shader.frag");
                     glUseProgram(program);
                 }
                 break;

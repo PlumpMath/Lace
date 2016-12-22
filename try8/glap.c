@@ -1,15 +1,11 @@
 #include "glap.h"
 #include "files.h"
 
-/* #define GB_MATH_IMPLEMENTATION */
-/* #include "gb_math.h" */
-
-static SDL_Window *win;
-static SDL_Renderer *rend;
-static SDL_GLContext glcontext;
-
 Glap glap_start() {
     OK(SDL_Init(SDL_INIT_EVERYTHING));
+
+    SDL_Window *win;
+    SDL_Renderer *rend;
 
     int window_flags = SDL_WINDOW_OPENGL;
     OK(SDL_CreateWindowAndRenderer(512, 512, window_flags, &win, &rend));
@@ -19,7 +15,7 @@ Glap glap_start() {
     // and SDL_GL_CONTEXT_MINOR_VERSION ..?! Only SDL_GL_CONTEXT_PROFILE_CORE.
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     
-    glcontext = SDL_GL_CreateContext(win);
+    SDL_GLContext ctx = SDL_GL_CreateContext(win);
     
     if(!gladLoadGL()) {
         printf("Something went wrong when loading glad.\n");
@@ -31,15 +27,17 @@ Glap glap_start() {
     printf("Version:  %s\n", glGetString(GL_VERSION));
 
     Glap glap = {
-        .window = win
+        .window = win,
+        .renderer = rend,
+        .context = ctx
     };
 
     return glap;
 }
 
-void glap_stop() {
-    SDL_GL_DeleteContext(glcontext);
-    SDL_DestroyWindow(win);
+void glap_stop(Glap glap) {
+    SDL_GL_DeleteContext(glap.context);
+    SDL_DestroyWindow(glap.window);
     SDL_Quit();
 }
 
@@ -53,9 +51,9 @@ void check_shader(GLuint shader, const char *shader_name) {
     }
 }
 
-GLuint load_shader_program() {
-    const char *vert_src = file_read_all("shader.vert");
-    const char *frag_src = file_read_all("shader.frag");
+GLuint load_shader_program(const char *vshader_name, const char *fshader_name) {
+    const char *vert_src = file_read_all(vshader_name);
+    const char *frag_src = file_read_all(fshader_name);
     
     GLuint vs;
     vs = glCreateShader(GL_VERTEX_SHADER);

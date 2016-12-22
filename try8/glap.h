@@ -8,11 +8,13 @@
 
 typedef struct {
     SDL_Window *window;
+    SDL_Renderer *renderer;
+    SDL_GLContext *context;
 } Glap;
 
 Glap glap_start();
 void glap_stop(Glap glap);
 
-GLuint load_shader_program();
+GLuint load_shader_program(const char *vshader_name, const char *fshader_name);
 
 #endif
