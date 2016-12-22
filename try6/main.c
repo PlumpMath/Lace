@@ -180,7 +180,7 @@ int main() {
     gbMat4 projection;
     gbMat4 camera;
 
-    gbVec3 eye = { 0, 0, -2 };
+    gbVec3 eye = { 0, 2, 3 };
     gbVec3 centre = { 0, 0, 0 };
     gbVec3 up = { 0, 1, 0 };
     
