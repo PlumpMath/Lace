@@ -40,7 +40,7 @@ int main() {
     glEnableVertexAttribArray(0);
     
     int run = 1;
-    while(run) {
+    while(run) {         
         // Render Loop
         glClearColor(0.2, 0.2, 0.2, 1.0);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -65,7 +65,7 @@ int main() {
             case SDL_WINDOWEVENT:
                 if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
                     printf("Reloading shader program.\n");
-                    load_shader_program("shader.vert", "shader.frag");
+                    program = load_shader_program("shader.vert", "shader.frag");
                     glUseProgram(program);
                 }
                 break;
