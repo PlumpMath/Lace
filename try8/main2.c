@@ -24,31 +24,42 @@ int main() {
     glBindVertexArray(vao);
 
     // Data to render
-    int n = 20;
-    float step = 2.0 / (float)n;
-    int vert_count = n * n;
-    int vert_buffer_size = sizeof(float) * vert_count * 2;
-    float *data = malloc(vert_buffer_size);
-
-    int i = 0;
-    for(float y = -1; y <= 1; y += step) {
-        for(float x = -1; x <= 1; x += step) {
-            data[i++] = x + step/2;
-            data[i++] = y + step/2;
-        }
-    }
+    float data[] = {
+        -0.5, 0.5,
+        0.5, 0.5,
+        0.0, -0.5
+    };
 
     // The vertex buffer object maps C array of floats to a shader input variables
     GLuint vbo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vert_buffer_size, data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
     glEnableVertexAttribArray(0);
-
-    glPointSize(5.0);
     
+    // More data to render
+    float data2[] = {
+        -0.35, 0.5,
+        0.75, 0.75,
+        0.0, -0.5
+    };
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    GLuint vao2;
+    glGenVertexArrays(1, &vao2);
+    glBindVertexArray(vao2);
+    
+    GLuint vbo2;
+    glGenBuffers(1, &vbo2);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo2);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(data2), data2, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
     int run = 1;
     while(run) {         
         // Render Loop
@@ -56,7 +67,10 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         glBindVertexArray(vao);
-        glDrawArrays(GL_POINTS, 0, vert_count);     
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        
+        glBindVertexArray(vao2);
+        glDrawArrays(GL_LINE_STRIP, 0, 3);
 
         // Show!
         SDL_GL_SwapWindow(glap.window);
