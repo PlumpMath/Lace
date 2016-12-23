@@ -47,7 +47,33 @@ int main() {
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
     glEnableVertexAttribArray(0);
 
+    // Elements
+    int index_count = vert_count;
+    int *indexes = malloc(sizeof(int) * index_count * 1);
+    
+    for(int i = 0; i < index_count; i += 1) {
+        int line = i / n;
+        if(line % 2 == 0) {
+            indexes[i] = i;
+        } else {
+            int rem = i % n;
+            indexes[i] = ((line + 1) * n) - (rem + 1);
+        }
+    }
+
+    /* 0 1 2 3 */
+    /* 4 5 6 7 */
+    /* 8 9 10 11 */
+    
+    GLuint elementsBuffer;
+    glGenBuffers(1, &elementsBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementsBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * index_count, indexes, GL_STATIC_DRAW);
+
     glPointSize(5.0);
+
+    GLint tLoc = glGetUniformLocation(program, "t");
+    assert(tLoc > -1);
     
     int run = 1;
     while(run) {         
@@ -55,8 +81,11 @@ int main() {
         glClearColor(0.2, 0.2, 0.2, 1.0);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glBindVertexArray(vao);
-        glDrawArrays(GL_POINTS, 0, vert_count);     
+        float t = SDL_GetTicks() / 1000.0f;
+        glUniform1f(tLoc, t);
+
+        //glDrawArrays(GL_LINES, 0, vert_count);
+        glDrawElements(GL_LINE_STRIP, index_count, GL_UNSIGNED_INT, 0);
 
         // Show!
         SDL_GL_SwapWindow(glap.window);
