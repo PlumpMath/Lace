@@ -15,8 +15,17 @@ typedef struct {
     float x, y, z;
 } Vert;
 
-float heightAt(float x, float z) {
+float height_at(float x, float z) {
     return sinf(x * 5) * 0.1 + x * cos(x * 100 + z * 10) * 0.3 + sinf(z * 5) * 0.2;
+    /* if(x > 0.1 && z > 0.1) { */
+    /*     return 0.7; */
+    /* } */
+    /* else if(x < -0.2) { */
+    /*     return 0.1; */
+    /* } */
+    /* else { */
+    /*     return 0.3; */
+    /* } */
 }
 
 int main() {    
@@ -32,18 +41,18 @@ int main() {
     glBindVertexArray(vao);
 
     // Data
-    #define MAX_VERT_COUNT 1024
+    #define MAX_VERT_COUNT 99999
     Vert *verts = malloc(sizeof(Vert) * MAX_VERT_COUNT);
     int vert_count = 0;
 
-    float w = 0.2;
+    float w = 0.1;
     for(float z = -0.8; z <= 0.8 - w; z += w) {
         for(float x = -0.8; x <= 0.8 - w; x += w) {
 
-            float y0 = heightAt(x, z);
-            float y1 = heightAt(x + w, z);
-            float y2 = heightAt(x, z + w);
-            float y3 = heightAt(x + w, z + w);
+            float y0 = height_at(x, z);
+            float y1 = height_at(x + w, z);
+            float y2 = height_at(x, z + w);
+            float y3 = height_at(x + w, z + w);
             
             verts[vert_count++] =  (Vert) { x, y0, z, };
             verts[vert_count++] =  (Vert) { x + w, y1, z };
