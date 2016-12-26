@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
     while(run) {
         float t = SDL_GetTicks() / 1000.0f;
 
-        eye = (gbVec3) { eye.x, eye.y + t * 0.01, eye.z + t * 0.005 };
+        eye = (gbVec3) { eye.x, eye.y + t * 0.001, eye.z + t * 0.0005 };
         
         // Draw
         glClearColor(0.2, 0.2, 0.2, 1.0);
@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
         gb_mat4_look_at(&camera, eye, (gbVec3) { 0, 0, 0}, (gbVec3) { 0, 1, 0 });
     
         gbMat4 perspective;
-        gb_mat4_perspective(&perspective, 45, 1.0, 0.001, 10000);
+        gb_mat4_perspective(&perspective, 65, 1.0, 0.001, 10000);
 
         gbMat4 objTransform;
         gb_mat4_rotate(&objTransform, (gbVec3) { 0.0, 1.0, 0.0 }, t);
