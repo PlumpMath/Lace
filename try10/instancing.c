@@ -29,43 +29,14 @@ int main() {
 
     // Data
     Vert verts[] = {
+        // front
         (Vert) { -0.5, -0.5, 0.5 },
         (Vert) { 0.5, -0.5, 0.5 },
-        (Vert) { -0.5, 0.5, 0.5 },
-
-        (Vert) { 0.5, -0.5, 0.5 },
         (Vert) { 0.5, 0.5, 0.5 },
         (Vert) { -0.5, 0.5, 0.5 },
-
-        (Vert) { 0.5, -0.5, 0.5 },
-        (Vert) { 0.5, -0.5, -0.5 },
-        (Vert) { 0.5, 0.5, 0.5 },
-
-        (Vert) { 0.5, -0.5, -0.5 },
-        (Vert) { 0.5, 0.5, -0.5 },
-        (Vert) { 0.5, 0.5, 0.5 },
-
+        // back
         (Vert) { -0.5, -0.5, -0.5 },
         (Vert) { 0.5, -0.5, -0.5 },
-        (Vert) { -0.5, 0.5, -0.5 },
-
-        (Vert) { 0.5, -0.5, -0.5 },
-        (Vert) { 0.5, 0.5, -0.5 },
-        (Vert) { -0.5, 0.5, -0.5 },
-
-        (Vert) { -0.5, -0.5, 0.5 },
-        (Vert) { -0.5, -0.5, -0.5 },
-        (Vert) { -0.5, 0.5, 0.5 },
-
-        (Vert) { -0.5, -0.5, -0.5 },
-        (Vert) { -0.5, 0.5, -0.5 },
-        (Vert) { -0.5, 0.5, 0.5 },
-
-        (Vert) { -0.5, 0.5, -0.5 },
-        (Vert) { -0.5, 0.5, 0.5 },
-        (Vert) { 0.5, 0.5, 0.5 },
-
-        (Vert) { 0.5, 0.5, 0.5 },
         (Vert) { 0.5, 0.5, -0.5 },
         (Vert) { -0.5, 0.5, -0.5 },
     };
@@ -79,13 +50,31 @@ int main() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
     glEnableVertexAttribArray(0);
 
+    // Element indexes
+    int indexes[] = {
+        // Front face
+        0, 1, 2,
+        2, 3, 0,
+        // Right face
+        5, 1, 2,
+        6, 5, 2,
+        // Left face
+        0, 3, 4,
+        4, 3, 7,
+        // Back face
+        4, 5, 6,
+        4, 6, 7,
+        // Top face
+        2, 3, 6,
+        3, 6, 7
+    };
+    
+    GLuint elementsBuffer;
+    glGenBuffers(1, &elementsBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementsBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes), indexes, GL_STATIC_DRAW);
+
     gbVec3 eye = { 0, 10.0, 15.0 };
-    
-    gbMat4 camera;
-    gb_mat4_look_at(&camera, eye, (gbVec3) { 0, 0, 0}, (gbVec3) { 0, 1, 0 });
-    
-    gbMat4 perspective;
-    gb_mat4_infinite_perspective(&perspective, 45, 1.0, 0.001);
 
     GLint cameraPerspLoc = glGetUniformLocation(program, "cameraPersp");
     assert(cameraPerspLoc > -1);
@@ -98,10 +87,18 @@ int main() {
     int run = 1;
     while(run) {
         float t = SDL_GetTicks() / 1000.0f;
+
+        eye = (gbVec3) { eye.x, eye.y + t * 0.01, eye.z + t * 0.005 };
         
         // Draw
         glClearColor(0.2, 0.2, 0.2, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        gbMat4 camera;
+        gb_mat4_look_at(&camera, eye, (gbVec3) { 0, 0, 0}, (gbVec3) { 0, 1, 0 });
+    
+        gbMat4 perspective;
+        gb_mat4_perspective(&perspective, 45, 1.0, 0.001, 10000);
 
         gbMat4 objTransform;
         gb_mat4_rotate(&objTransform, (gbVec3) { 0.0, 1.0, 0.0 }, t);
@@ -113,7 +110,8 @@ int main() {
         
         glUniformMatrix4fv(cameraPerspLoc, 1, GL_FALSE, cameraPersp.e);
         
-        glDrawArrays(GL_TRIANGLES, 0, vert_count);
+        //glDrawArrays(GL_TRIANGLES, 0, vert_count);
+        glDrawElementsInstanced(GL_TRIANGLES, sizeof(indexes) / sizeof(int), GL_UNSIGNED_INT, 0, 10000);
 
         // Swap frame buffer
         SDL_GL_SwapWindow(glap.window);
@@ -135,7 +133,7 @@ int main() {
                 break;
             case SDL_WINDOWEVENT:
                 if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
-                    printf("Reloading shader program.\n");
+                    //printf("Reloading shader program.\n");
                     program = load_shader_program("shader.vert", "shader.frag");
                     glUseProgram(program);
                 }
