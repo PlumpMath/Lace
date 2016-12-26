@@ -24,7 +24,7 @@ int main() {
     glBindVertexArray(vao);
 
     // Data to render
-    int n = 20;
+    int n = 40;
     float step = 2.0 / (float)n;
     int vert_count = n * n;
     int vert_buffer_size = sizeof(float) * vert_count * 2;

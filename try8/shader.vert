@@ -8,9 +8,12 @@ out vec2 vPos;
 
 void main() {
     vPos = pos;
-    mat4 transform = mat4(vec4(1, 0.2, 0, 0),
-                          vec4(-0.2, 1, 0, 0),
-                          vec4(0, 0, 1, 0),
-                          vec4(0, 0, 0, 1));
-    gl_Position = transform * vec4(pos.x, pos.y + sin(t + pos.x) * 0.15, 0.0, 1.0);
+    mat4 transform = mat4(vec4(1, 0, 0, 0),
+                          vec4(0, 1, 0, 0),
+                          vec4(0, 0, t, 0),
+                          vec4(0, 0, 0, 1.2));
+    gl_Position = transform * vec4(pos.x + sin(t + pos.x * pos.y * 6) * 0.1,
+                                   pos.y + sin(t + pos.x * pos.y * 6) * 0.1,
+                                   0.0,
+                                   1.0);
 }
