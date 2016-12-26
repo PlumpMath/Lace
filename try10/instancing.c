@@ -5,6 +5,7 @@
 #include "glap.h"
 #include "files.h"
 #include "array.h"
+#include <libgen.h>
 
 #define GB_MATH_IMPLEMENTATION
 #include "gb_math.h"
@@ -15,12 +16,21 @@ typedef struct {
     float x, y, z;
 } Vert;
 
-int main() {    
+int main(int argc, char **argv) {
+
+    printf("argv[0] = %s\n", argv[0]);
+    
     Glap glap = glap_start();
+    printf("Glap is go.\n");
    
     // GL Actual Work
-    program = load_shader_program("shader.vert", "shader.frag");
+    char *base_path = dirname(argv[0]);
+    char *vspath, *fspath;
+    asprintf(&vspath, "%s/shader.vert", base_path);
+    asprintf(&fspath, "%s/shader.frag", base_path);
+    program = load_shader_program(vspath, fspath);
     glUseProgram(program);
+    printf("Shader programs loaded.\n");
 
     // All programs need at least one Vertex Array Object
     GLuint vao;
@@ -74,7 +84,7 @@ int main() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementsBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes), indexes, GL_STATIC_DRAW);
 
-    gbVec3 eye = { 0, 10.0, 15.0 };
+    gbVec3 eye = { 0, 1.0, 10.0 };
 
     GLint cameraPerspLoc = glGetUniformLocation(program, "cameraPersp");
     assert(cameraPerspLoc > -1);
@@ -134,7 +144,7 @@ int main() {
             case SDL_WINDOWEVENT:
                 if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
                     //printf("Reloading shader program.\n");
-                    program = load_shader_program("shader.vert", "shader.frag");
+                    program = load_shader_program(vspath, fspath);
                     glUseProgram(program);
                 }
                 break;

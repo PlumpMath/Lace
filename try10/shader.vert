@@ -6,6 +6,7 @@ uniform mat4 cameraPersp;
 uniform mat4 transform;
 
 out vec3 pos;
+flat out int i;
 
 vec4 offset(int i) {
     return vec4((i % 100) * 3 - 200, 0, (i / 100) * 3 - 200, 0);
@@ -13,5 +14,6 @@ vec4 offset(int i) {
 
 void main() {
     pos = vPos;
+    i = gl_InstanceID;
     gl_Position = cameraPersp * (transform * vec4(vPos.x, vPos.y, vPos.z, 1.0) + offset(gl_InstanceID));
 }

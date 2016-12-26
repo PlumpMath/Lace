@@ -9,6 +9,7 @@ Glap glap_start() {
 
     int window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI;
     OK(SDL_CreateWindowAndRenderer(800, 800, window_flags, &win, &rend));
+    printf("Window created.\n");
 
     // Must set this before creating the context
     // On OSX it seems like we don't need to set SDL_GL_CONTEXT_MAJOR_VERSION

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 char *file_read_all(const char *path) {
+    printf("Trying to open file '%s'.\n", path);
     FILE *f = fopen(path, "r");
     fseek(f, 0, SEEK_END);
     long fsize = ftell(f);
