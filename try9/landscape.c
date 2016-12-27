@@ -5,6 +5,7 @@
 #include "glap.h"
 #include "files.h"
 #include "array.h"
+#include "hotrod.h"
 
 #define GB_MATH_IMPLEMENTATION
 #include "gb_math.h"
@@ -45,26 +46,8 @@ int main() {
     Vert *verts = malloc(sizeof(Vert) * MAX_VERT_COUNT);
     int vert_count = 0;
 
-    float w = 0.1;
-    for(float z = -0.8; z <= 0.8 - w; z += w) {
-        for(float x = -0.8; x <= 0.8 - w; x += w) {
-
-            float y0 = height_at(x, z);
-            float y1 = height_at(x + w, z);
-            float y2 = height_at(x, z + w);
-            float y3 = height_at(x + w, z + w);
-            
-            verts[vert_count++] =  (Vert) { x, y0, z, };
-            verts[vert_count++] =  (Vert) { x + w, y1, z };
-            verts[vert_count++] =  (Vert) { x, y2, z + w };
-
-            verts[vert_count++] =  (Vert) { x + w, y1, z };
-            verts[vert_count++] =  (Vert) { x + w, y3, z + w };
-            verts[vert_count++] =  (Vert) { x, y2, z + w };
-
-            assert(vert_count < MAX_VERT_COUNT);
-        }
-    }
+    //HOTROD(fill_data, verts, &vert_count);
+    
 
     GLuint vbo;
     glGenBuffers(1, &vbo);
@@ -129,6 +112,12 @@ int main() {
                     printf("Reloading shader program.\n");
                     program = load_shader_program("shader.vert", "shader.frag");
                     glUseProgram(program);
+
+                    printf("Reloading data.\n");
+                    vert_count = 0;
+                    HOTROD(fill_data, verts, &vert_count);
+                    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+                    glBufferData(GL_ARRAY_BUFFER, vert_count * sizeof(Vert), verts, GL_STATIC_DRAW);
                 }
                 break;
             case SDL_KEYDOWN:

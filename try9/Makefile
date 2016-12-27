@@ -4,7 +4,7 @@ FRAMEWORKS=-framework OpenGL -framework Cocoa -framework IOKit
 APPNAME=Landscape
 
 all: landscape.o;
-	clang landscape.c glap.c array.c glad.c files.c -o $(APPNAME) -g -O0 $(CFLAGS) $(LDFLAGS) $(FRAMEWORKS)
+	clang hotrod.c landscape.c glap.c array.c glad.c files.c -o $(APPNAME) -g -O0 $(CFLAGS) $(LDFLAGS) $(FRAMEWORKS)
 
 run:
 	./$(APPNAME)
