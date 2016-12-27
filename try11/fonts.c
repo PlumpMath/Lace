@@ -32,8 +32,11 @@ int main(int argc, char **argv) {
     FT_Library ftlib;
     OK(FT_Init_FreeType(&ftlib));
 
+    char *fontpath;
+    asprintf(&fontpath, "%s/Hasklig.otf", base_path);
+    
     FT_Face face;
-    OK(FT_New_Face(ftlib, "./Hasklig.otf", 0, &face));
+    OK(FT_New_Face(ftlib, fontpath, 0, &face));
 
     FT_Set_Pixel_Sizes(face, 0, 50);
 
