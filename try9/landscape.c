@@ -46,7 +46,7 @@ int main() {
     Vert *verts = malloc(sizeof(Vert) * MAX_VERT_COUNT);
     int vert_count = 0;
 
-    //HOTROD(fill_data, verts, &vert_count);
+    HOTROD(fill_data, verts, &vert_count);
     
 
     GLuint vbo;
@@ -115,7 +115,7 @@ int main() {
 
                     printf("Reloading data.\n");
                     vert_count = 0;
-                    HOTROD(fill_data, verts, &vert_count);
+                    HOTROD_LATER(fill_data, verts, &vert_count);
                     glBindBuffer(GL_ARRAY_BUFFER, vbo);
                     glBufferData(GL_ARRAY_BUFFER, vert_count * sizeof(Vert), verts, GL_STATIC_DRAW);
                 }
